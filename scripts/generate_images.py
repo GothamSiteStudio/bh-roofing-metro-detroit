@@ -125,7 +125,7 @@ def make_og(hero_raw):
     d.text((110,300), "BH Roofing", font=font(74), fill=(255,255,255))
     d.text((112,392), "METRO DETROIT", font=font(30), fill=(248,190,76))
     d.text((110,452), "Roof Replacement · Repair · Storm Damage", font=font(28, False), fill=(230,238,246))
-    d.text((110,498), "Free Estimates  •  Licensed & Insured", font=font(30), fill=(255,255,255))
+    d.text((110,498), "(313) 236-4558", font=font(40), fill=(255,255,255))
     im.save(out, quality=88)
     print("  og-image.jpg written")
 

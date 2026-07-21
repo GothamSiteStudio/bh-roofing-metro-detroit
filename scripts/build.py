@@ -6,9 +6,8 @@ Consumes scripts/_copy.json (produced by the copywriting workflow) + metadata be
 and emits a fully SEO-optimized static site (clean directory URLs, JSON-LD, sitemap,
 robots, manifest, Matomo). Run:  python scripts/build.py
 
-Phone-safe: the business phone number is not live yet, so BIZ["tel"] is empty and every
-"call" affordance automatically falls back to a free-estimate / email CTA. When the number
-arrives, set BIZ phone/tel/telplain and rerun — tap-to-call wires itself across the whole site.
+Phone-safe: every "call" affordance is driven by BIZ["tel"]. If it is ever blanked out, the
+site automatically falls back to a free-estimate / email CTA instead of rendering a dead link.
 """
 import json, os, html, datetime, re, hashlib
 
@@ -32,9 +31,9 @@ ASSET_VER = _asset_ver()
 BIZ = dict(
     name="BH Roofing Metro Detroit",
     short="BH Roofing",
-    phone="",            # <-- no phone yet; fill display number here when live, e.g. "(313) 555-1234"
-    tel="",              # <-- e.g. "+13135551234"  (drives tel: links)
-    telplain="",         # <-- e.g. "3135551234"
+    phone="(313) 236-4558",
+    tel="+13132364558",
+    telplain="3132364558",
     email="info@bhroofingmetrodetroit.com",
     domain="bhroofingmetrodetroit.com",
     base="https://bhroofingmetrodetroit.com",

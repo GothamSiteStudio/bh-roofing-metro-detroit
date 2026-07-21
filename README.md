@@ -4,7 +4,7 @@ Static, SEO-first marketing site for **BH Roofing Metro Detroit** — residentia
 (replacement, repair, storm & hail damage, inspections, flat/commercial, metal, gutters & siding) serving
 metro Detroit and suburbs within 35 miles (Wayne, Oakland & Macomb counties).
 
-- **Phone:** _not live yet — see CONTENT-TODO.md_ · **Email:** info@bhroofingmetrodetroit.com
+- **Phone:** (313) 236-4558 · **Email:** info@bhroofingmetrodetroit.com
 - **Hours:** Sun–Thu 9am–5pm · Fri 9am–12pm · Sat closed
 - **Domain:** https://bhroofingmetrodetroit.com
 - **Host:** GitHub Pages (custom domain via `CNAME`)
@@ -36,10 +36,10 @@ python scripts/generate_images.py  # (re)generate imagery via the Gemini API (+ 
 
 ### Phone number
 
-The business phone is **not live yet**, so the site ships without a number and every "call" affordance falls back
-to a free-estimate / email CTA. When the number arrives, set `BIZ["phone"]`, `BIZ["tel"]`, and `BIZ["telplain"]`
-in `scripts/build.py` and rerun `build.py` — tap-to-call wires itself across the whole site (header, footer, mobile
-bar, CTAs, schema).
+Tap-to-call is driven entirely by `BIZ["phone"]` / `BIZ["tel"]` / `BIZ["telplain"]` in `scripts/build.py` — set to
+**(313) 236-4558**. Change it there and rerun `build.py` to update the header, footer, mobile call bar, every CTA,
+and the schema `telephone` in one pass. If `tel` is ever blanked, the site degrades gracefully to a
+free-estimate / email CTA instead of rendering a dead link.
 
 ## SEO features
 
