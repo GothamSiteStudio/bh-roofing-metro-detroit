@@ -114,9 +114,9 @@ RELATED = {
  "roof-replacement": ["roof-repair","metal-roofing","roof-inspection","roof-replacement-cost"],
  "roof-repair": ["storm-damage-roof-repair","roof-inspection","attic-ventilation-skylights","roof-replacement"],
  "storm-damage-roof-repair": ["roof-repair","roof-inspection","siding-installation","roof-replacement"],
- "roof-inspection": ["roof-repair","roof-replacement","storm-damage-roof-repair","roof-replacement-cost"],
+ "roof-inspection": ["roof-repair","roof-replacement","flat-commercial-roofing","roof-replacement-cost"],
  "flat-commercial-roofing": ["roof-repair","roof-replacement","roof-inspection","roof-replacement-cost"],
- "metal-roofing": ["roof-replacement","roof-replacement-cost","roof-inspection","gutter-installation"],
+ "metal-roofing": ["roof-replacement","roof-replacement-cost","flat-commercial-roofing","gutter-installation"],
  "gutter-installation": ["roof-replacement","siding-installation","attic-ventilation-skylights","roof-repair"],
  "siding-installation": ["roof-replacement","gutter-installation","storm-damage-roof-repair","roof-replacement-cost"],
  "attic-ventilation-skylights": ["roof-replacement","roof-repair","gutter-installation","roof-inspection"],
@@ -188,9 +188,58 @@ def svc_url(slug): return f"/services/{slug}/"
 def city_url(slug): return f"/service-areas/{slug}/"
 def city_name(slug): return CITY_COPY[slug]["city"]
 
-def paras(lst): return "".join(f"<p>{esc_inline(p)}</p>" for p in lst)
-def esc_inline(s):
-    return esc(s)
+# --------------------------------------------------------------------------- #
+#  CONTEXTUAL INTERNAL LINKING
+#  Auto-links the first mention of a topic in body prose to its money page.
+#  Ordered most-specific-first so "roof replacement cost" wins over "roof replacement".
+# --------------------------------------------------------------------------- #
+LINK_PHRASES = [
+ (r"roof replacement costs?|cost of a new roof|roofing costs?", "/services/roof-replacement-cost/"),
+ (r"storm damage|hail damage|wind damage", "/services/storm-damage-roof-repair/"),
+ (r"roof inspections?", "/services/roof-inspection/"),
+ (r"standing[- ]seam|metal roofing|metal roofs?", "/services/metal-roofing/"),
+ (r"commercial roofing|flat roofs?|low[- ]slope roofs?", "/services/flat-commercial-roofing/"),
+ (r"gutter guards?|seamless gutters|gutters", "/services/gutter-installation/"),
+ (r"attic ventilation|ice dams?|skylights?", "/services/attic-ventilation-skylights/"),
+ (r"roof replacements?|re-roofing|re-roofs?|tear-offs?", "/services/roof-replacement/"),
+ (r"roof leaks?|roof repairs?", "/services/roof-repair/"),
+ (r"siding", "/services/siding-installation/"),
+ (r"financing", "/financing/"),
+]
+
+class Linker:
+    """Per-page contextual linker: at most one link per target, capped per page,
+    never links a page to itself, and never matches inside markup it just inserted."""
+    def __init__(self, current_url, budget=5):
+        self.cur = current_url; self.budget = budget; self.used = set()
+
+    def __call__(self, t):
+        if self.budget <= 0:
+            return t
+        cands = []
+        for pattern, url in LINK_PHRASES:
+            if url == self.cur or url in self.used:
+                continue
+            m = re.search(r"\b(" + pattern + r")\b", t, re.I)
+            if m:
+                cands.append((m.start(1), m.end(1), url))
+        cands.sort()
+        picked, last = [], -1
+        for s, e, u in cands:
+            if s >= last and u not in self.used:
+                picked.append((s, e, u)); self.used.add(u); last = e
+                if len(picked) >= self.budget:
+                    break
+        self.budget -= len(picked)
+        for s, e, u in reversed(picked):          # splice from the end so spans stay valid
+            t = t[:s] + f'<a href="{u}">' + t[s:e] + "</a>" + t[e:]
+        return t
+
+def paras(lst, linker=None):
+    return "".join(f"<p>{esc_inline(p, linker)}</p>" for p in lst)
+def esc_inline(s, linker=None):
+    t = esc(s)
+    return linker(t) if linker else t
 
 TOP_CITIES = ["warren","sterling-heights","troy","livonia","royal-oak","dearborn","canton","novi"]
 
@@ -317,7 +366,7 @@ def header(active=""):
     city_items = "".join(
         f'<a class="dd-item" href="{city_url(s)}"><span class="di-ic">{ICONS["mappin"]}</span>'
         f'<span><b>{esc(city_name(s))}</b><span>{esc(CITY_META[s][0])} County</span></span></a>'
-        for s in CITY_ORDER[:12])
+        for s in CITY_ORDER)
     nav_call = ""
     if HAS_PHONE:
         nav_call = (f'<a class="nav-call" href="tel:{BIZ["tel"]}"><span class="ring">{ICONS["phone"]}</span>'
@@ -370,7 +419,7 @@ def mobile_cta():
 
 def footer():
     svc_links = "".join(f'<li><a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a></li>' for s in SVC_ORDER)
-    city_links = "".join(f'<li><a href="{city_url(s)}">{esc(city_name(s))}</a></li>' for s in TOP_CITIES)
+    city_links = "".join(f'<li><a href="{city_url(s)}">{esc(city_name(s))}</a></li>' for s in CITY_ORDER)
     social = ""
     for key,url in [("google",BIZ["google"]),("facebook",BIZ["facebook"]),("instagram",BIZ["instagram"])]:
         if not url:
@@ -454,6 +503,23 @@ def brands_block():
     return f'''<section class="section-sm"><div class="container">
       <p class="text-center" style="color:var(--steel);font-weight:600;margin-bottom:18px">Trusted roofing &amp; exterior brands we install</p>
       <div class="brands">{b}</div></div></section>'''
+
+def resource_row(exclude=None, label="Helpful next steps"):
+    """Contextual links to the support pages that would otherwise only be reachable
+    from the nav/footer (about, gallery, reviews, faq, financing, cost guide)."""
+    items = [
+        ("/services/", "All roofing services"),
+        ("/services/roof-replacement-cost/", "Roofing cost guide"),
+        ("/service-areas/", "Areas we serve"),
+        ("/gallery/", "See our work"),
+        ("/reviews/", "Reviews &amp; our promise"),
+        ("/faq/", "Roofing FAQs"),
+        ("/financing/", "Financing options"),
+        ("/about/", "About BH Roofing"),
+    ]
+    links = " · ".join(f'<a href="{u}">{t}</a>' for u, t in items if u != exclude)
+    return (f'<p class="text-center" style="margin-top:1.4em;font-size:.95rem;color:var(--steel)">'
+            f'<strong>{label}:</strong> {links}</p>')
 
 def value_props_block(intro=None):
     cards = ""
@@ -582,7 +648,8 @@ def build_home():
     chips_city = "".join(
         f'<a class="city-chip" href="{city_url(s)}">{esc(city_name(s))} {ICONS["arrow"]}<span>{CITY_META[s][0]} Co.</span></a>'
         for s in CITY_ORDER)
-    intro_body = paras(h["intro_body"])
+    lk = Linker("/", budget=6)
+    intro_body = paras(h["intro_body"], lk)
     faqs = [(f["q"],f["a"]) for f in h["faqs"]]
     graph = [website_node(), breadcrumb_node([("Home","/")]), faq_node(faqs),
              service_node("Roof Replacement and Repair","roof-repair",h["meta_description"],url_path="/")]
@@ -624,6 +691,7 @@ def build_home():
         <h2>Proudly serving metro Detroit &amp; 18+ suburbs</h2><p>{esc(h["areas_intro"])}</p></div>
       <div class="city-grid">{chips_city}</div>
       <p class="text-center mt-2"><a class="btn btn-navy" href="/service-areas/">See all service areas {ICONS["arrow"]}</a></p>
+      {resource_row(exclude="/", label="Explore")}
     </div></section>
     {reviews_invite()}
     {brands_block()}
@@ -665,9 +733,10 @@ def build_services_hub():
 
 def build_service(slug):
     c = SVC_COPY[slug]; i = SVC_INFO[slug]
+    lk = Linker(svc_url(slug), budget=6)
     secs = ""
     for s in c["sections"]:
-        b = paras(s["body"])
+        b = paras(s["body"], lk)
         bl = ""
         if s.get("bullets"):
             bl = "<ul>" + "".join(f"<li>{esc(x)}</li>" for x in s["bullets"]) + "</ul>"
@@ -683,7 +752,11 @@ def build_service(slug):
         rel += f'''<a class="card svc-card" href="{svc_url(r)}">
           <div class="sc-media"><img src="/assets/img/{ri["img"]}.webp" srcset="{srcset(ri["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(rc["h1"])}"></div>
           <div class="sc-body"><h3>{esc(ri["nav"])}</h3><p>{esc(rc["hero_tagline"])}</p><span class="sc-link">Learn more {ICONS["arrow"]}</span></div></a>'''
-    city_links = " · ".join(f'<a href="{city_url(s)}">{esc(city_name(s))}</a>' for s in TOP_CITIES)
+    # Rotate the city list per service page (step coprime with 18) so link equity reaches
+    # every city page instead of concentrating on the same 8 every time.
+    _off = (SVC_ORDER.index(slug) * 7) % len(CITY_ORDER)
+    _svc_cities = [CITY_ORDER[(_off + k) % len(CITY_ORDER)] for k in range(8)]
+    city_links = " · ".join(f'<a href="{city_url(s)}">{esc(city_name(s))}</a>' for s in _svc_cities)
     graph = [breadcrumb_node([("Home","/"),("Services","/services/"),(SVC_INFO[slug]["nav"],svc_url(slug))]),
              service_node(SERVICE_TYPE[slug], slug, c["meta_description"]), faq_node(faqs)]
     active = "cost" if slug=="roof-replacement-cost" else ""
@@ -701,7 +774,7 @@ def build_service(slug):
     {trust_strip()}
     <section class="section"><div class="container"><div class="split" style="align-items:flex-start">
       <div class="prose">
-        <p class="lead">{esc(c["intro_lead"])}</p>
+        <p class="lead">{esc_inline(c["intro_lead"], lk)}</p>
         {secs}
         <h2>What's included</h2>
         <ul>{incl}</ul>
@@ -730,7 +803,8 @@ def build_service(slug):
       <div class="section-head"><span class="eyebrow">Serving metro Detroit</span><h2>Available across every suburb we serve</h2>
       <p>Including {city_links} and <a href="/service-areas/">18+ more cities</a>.</p></div>
       <div class="section-head" style="margin-top:8px"><h2 style="font-size:1.5rem">Related services</h2></div>
-      <div class="grid grid-4">{rel}</div></div></section>
+      <div class="grid grid-4">{rel}</div>
+      {resource_row(exclude=svc_url(slug))}</div></section>
     {cta_band()}'''
     render(svc_url(slug), c["meta_title"], c["meta_description"], body, graph, active=active,
            og_image="/assets/img/og-image.jpg")
@@ -764,7 +838,8 @@ def build_areas_hub():
 
 def build_city(slug):
     c = CITY_COPY[slug]; county, neighbors, top = CITY_META[slug]
-    ctx = paras(c["local_context"])
+    lk = Linker(city_url(slug), budget=5)
+    ctx = paras(c["local_context"], lk)
     why = "".join(f"<li>{esc(x)}</li>" for x in c["why_local"])
     faqs = [(f["q"],f["a"]) for f in c["faqs"]]
     top_cards = ""
@@ -810,12 +885,12 @@ def build_city(slug):
     {trust_strip()}
     <section class="section"><div class="container"><div class="split" style="align-items:flex-start">
       <div class="prose">
-        <p class="lead">{esc(c["intro_lead"])}</p>
+        <p class="lead">{esc_inline(c["intro_lead"], lk)}</p>
         <h2>Roofing {esc(c["city"])} homeowners rely on</h2>
         {ctx}
         {replacement_sec}
         <h2>The roofing {esc(c["city"])} homes need most</h2>
-        <p>{esc(c["service_emphasis"])}</p>
+        <p>{esc_inline(c["service_emphasis"], lk)}</p>
       </div>
       <aside class="sidebar-card">
         <h3>Free estimate in {esc(c["city"])}</h3>
@@ -832,15 +907,17 @@ def build_city(slug):
     {faq_section(faqs, f"Roofing in {c['city']} — FAQs")}
     <section class="section"><div class="container">
       <div class="section-head"><span class="eyebrow">Nearby</span><h2>We also serve neighboring communities</h2></div>
-      <div class="city-grid">{neigh}</div></div></section>
+      <div class="city-grid">{neigh}</div>
+      {resource_row(exclude=city_url(slug))}</div></section>
     {cta_band(f"Need a roof repaired or replaced in {c['city']}?", "Get a free, no-obligation estimate today. Fast, reliable scheduling across " + county + " County whenever our schedule allows.")}'''
     render(city_url(slug), c["meta_title"], c["meta_description"], body, graph)
 
 def build_about():
     a = CORE["about"]
+    lk = Linker("/about/", budget=6)
     secs = ""
     for idx,s in enumerate(a["body"]):
-        secs += f'<h2>{esc(s["h2"])}</h2>{paras(s["paras"])}'
+        secs += f'<h2>{esc(s["h2"])}</h2>{paras(s["paras"], lk)}'
     vals = ""
     ics = ["shield","clock","hand","badge","truck","spark"]
     for idx,v in enumerate(a["values"]):
@@ -854,7 +931,8 @@ def build_about():
     </div></div></section>
     {breadcrumb([("Home","/"),("About","/about/")])}
     {trust_strip()}
-    <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">{secs}</div></div></section>
+    <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">{secs}</div>
+      {resource_row(exclude="/about/")}</div></section>
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">What we stand for</span><h2>Values behind every roof</h2></div>
       <div class="grid grid-3">{vals}</div></div></section>
@@ -864,6 +942,7 @@ def build_about():
 
 def build_financing():
     f = CORE["financing"]
+    lk = Linker("/financing/", budget=5)
     pts = "".join(f"<li>{esc(x)}</li>" for x in f["points"])
     fin_faqs = [
         ("Can I finance a roof replacement in metro Detroit?",
@@ -891,7 +970,7 @@ def build_financing():
     {breadcrumb([("Home","/"),("Financing","/financing/")])}
     {trust_strip()}
     <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">
-      {paras(f["body"])}
+      {paras(f["body"], lk)}
       <h2>Flexible ways to pay</h2><ul>{pts}</ul>
       <h2>How financing a roofing project works</h2>
       {steps}
