@@ -25,9 +25,9 @@ or ask and we'll do it.
    cities). This is the #1 local-ranking lever for an address-less business. Then set `BIZ["google"]` (and
    `facebook` / `instagram`) in `build.py` so the footer, reviews page, and schema `sameAs` link to real profiles.
 
-4. **License number** — set `BIZ["license_no"]` in `build.py` (shows in the footer). **Confirm the "Licensed &
-   Insured" claim is accurate.** If the business is not yet licensed/insured, remove those trust badges
-   (`TRUST_ITEMS`, `HERO_CHIPS`, sidebar lists) — do not claim it otherwise.
+4. **No licence, insurance or bonding claims (owner decision 2026-09-30).** The site must never say or imply
+   that the business or its crews are licensed, insured or bonded, and shows no licence number. The `license_no` field
+   was removed from `build.py`.
 
 5. **Submit sitemap** — after DNS is live and HTTPS works, submit `https://bhroofingmetrodetroit.com/sitemap.xml`
    to **Google Search Console** and **Bing Webmaster Tools**.
@@ -41,8 +41,9 @@ or ask and we'll do it.
 8. **Financing** — `/financing/` is written generically ("options on approved credit"). Confirm your real lender/terms.
 9. **Business hours** — set to **Sun–Thu 9am–5pm · Fri 9am–12pm · Sat closed** (top bar, footer, contact page, and
     schema `openingHoursSpecification`). The site makes **no 24/7 or after-hours claims**. Confirm the hours are right.
-10. **Cost guide** — `/services/roof-replacement-cost/` uses *typical* market price ranges for education, always
-    pointing to a free exact estimate. Confirm the ranges are in line with your pricing.
+10. **Cost page (owner decision 2026-09-30: no prices on the site).** `/services/roof-replacement-cost/` explains what
+    drives the cost, with no figures, and asks visitors to call for a price on their job. No dollar figures, ranges,
+    fees or "free estimate / free inspection" promises anywhere on the site.
 11. **Storm / insurance page** — `/services/storm-damage-roof-repair/` states honestly that the homeowner is
     responsible for their own deductible and never promises "free" insurance roofs. Keep it that way.
 12. **Gallery** — `/gallery/` uses representative imagery. Swap in real, geo-tagged project photos when available

@@ -39,7 +39,7 @@ python scripts/generate_images.py  # (re)generate imagery via the Gemini API (+ 
 Tap-to-call is driven entirely by `BIZ["phone"]` / `BIZ["tel"]` / `BIZ["telplain"]` in `scripts/build.py` — set to
 **(313) 236-4558**. Change it there and rerun `build.py` to update the header, footer, mobile call bar, every CTA,
 and the schema `telephone` in one pass. If `tel` is ever blanked, the site degrades gracefully to a
-free-estimate / email CTA instead of rendering a dead link.
+contact / email CTA instead of rendering a dead link.
 
 ## SEO features
 

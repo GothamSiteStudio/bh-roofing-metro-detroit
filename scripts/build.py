@@ -7,7 +7,7 @@ and emits a fully SEO-optimized static site (clean directory URLs, JSON-LD, site
 robots, manifest, Matomo). Run:  python scripts/build.py
 
 Phone-safe: every "call" affordance is driven by BIZ["tel"]. If it is ever blanked out, the
-site automatically falls back to a free-estimate / email CTA instead of rendering a dead link.
+site automatically falls back to a contact / email CTA instead of rendering a dead link.
 """
 import json, os, html, datetime, re, hashlib
 
@@ -43,7 +43,6 @@ BIZ = dict(
     hours_full="Sun–Thu 9am–5pm · Fri 9am–12pm · Sat closed",
     lat=42.45, lng=-83.15, radius=56327,
     facebook="", instagram="", google="",   # placeholders — set real profile URLs
-    license_no="",                            # placeholder — client to confirm
     matomo_site_id="22",                      # Matomo site ID (matomo.alphalockandsafe.com)
 )
 HAS_PHONE = bool(BIZ["tel"])
@@ -104,7 +103,7 @@ SVC_META = [
  ("gutter-installation", "Gutters & Guards", "gutter", "svc-gutters", "Exterior"),
  ("siding-installation", "Siding", "home", "svc-siding", "Exterior"),
  ("attic-ventilation-skylights", "Ventilation & Skylights", "wind", "svc-ventilation", "Exterior"),
- ("roof-replacement-cost", "Cost Guide", "dollar", "svc-cost", "Planning"),
+ ("roof-replacement-cost", "Cost Factors", "dollar", "svc-cost", "Planning"),
 ]
 SVC_ORDER = [s[0] for s in SVC_META]
 SVC_INFO = {s[0]: dict(nav=s[1], icon=s[2], img=s[3], group=s[4]) for s in SVC_META}
@@ -157,25 +156,25 @@ VALUE_PROPS = [
  ("clock","Fast, Reliable Scheduling","A spreading leak or storm damage can't wait. We move quickly across metro Detroit and get a crew on your roof as soon as our schedule allows — no waiting weeks in the rain."),
  ("mappin","Local Metro Detroit Roofers","We know Michigan roofs and Michigan weather — freeze-thaw, ice dams, and spring wind storms. From Wayne to Oakland to Macomb County, we're right around the corner."),
  ("roof","Every Roofing Service, One Team","Replacement, repair, storm restoration, flat and commercial, metal, gutters, and siding — residential and commercial, all handled by one local crew."),
- ("hand","Honest, Upfront Pricing","Clear written quotes and free, no-obligation estimates. We'll tell you honestly whether you need a repair or a replacement — no scare tactics, no pressure, ever."),
- ("shield","Licensed, Insured & Guaranteed","A licensed and insured local crew that protects your property, sweeps up every stray nail, and stands behind the work with a workmanship guarantee."),
+ ("hand","Honest, Straight Answers","A clear, written scope and price before any work starts, with no obligation to go ahead. We'll tell you honestly whether you need a repair or a replacement, with no scare tactics and no pressure, ever."),
+ ("shield","Careful, Clean & Guaranteed","A careful local crew that protects your property, sweeps up every stray nail, and stands behind the work with a workmanship guarantee."),
  ("spark","Curb Appeal & Home Value","A new roof doesn't just keep you dry — it transforms your home's look, energy efficiency, and resale value for years to come."),
 ]
 PROCESS = [
- ("Request Your Free Estimate","Tell us what's going on — a leak, missing shingles, storm damage, or a roof that's just getting old. We'll answer your questions and schedule a visit that works for you."),
- ("Free Roof Inspection & Quote","We inspect the shingles, flashing, valleys, and ventilation, then give you a clear written quote in plain English — with honest repair-versus-replace advice. No obligation."),
+ ("Get in Touch","Tell us what's going on: a leak, missing shingles, storm damage, or a roof that's just getting old. We'll answer your questions and schedule a visit that works for you."),
+ ("Roof Inspection & Straight Advice","We inspect the shingles, flashing, valleys, and ventilation, then explain what we found in plain English, with honest repair-versus-replace advice and a written price for the work. No obligation."),
  ("Expert Installation or Repair","We protect your landscaping and siding, then install or repair to code with quality materials and skilled crews who treat your home like their own."),
  ("Cleanup & Workmanship Guarantee","We haul away every scrap, run a magnetic sweep for stray nails, and back our work with a guarantee. Your roof is buttoned up tight against Michigan weather."),
 ]
 TRUST_ITEMS = [
- ("shield","Licensed & Insured"),
+ ("roof","Every Roofing Service, One Team"),
  ("clock","Fast, Reliable Scheduling"),
- ("dollar","Free, No-Obligation Estimates"),
+ ("clipboard","Honest Repair-or-Replace Advice"),
  ("badge","Workmanship Guarantee"),
  ("mappin","Local Metro Detroit Team"),
  ("hand","Financing Available"),
 ]
-HERO_CHIPS = [("shield","Licensed & Insured"),("dollar","Free Estimates"),("badge","Workmanship Guarantee"),("bolt","Storm Damage Specialists")]
+HERO_CHIPS = [("mappin","Local Metro Detroit Team"),("clock","Fast, Reliable Scheduling"),("badge","Workmanship Guarantee"),("bolt","Storm Damage Specialists")]
 BRANDS = ["GAF","Owens Corning","CertainTeed","IKO","Malarkey","Velux"]
 
 # --------------------------------------------------------------------------- #
@@ -289,7 +288,6 @@ def business_node():
         "image": U("/assets/img/hero-home.jpg"),
         "logo": U("/assets/img/icon-512.png"),
         "description": "Residential and commercial roofing serving metro Detroit and suburbs within 35 miles — roof replacement, roof repair, storm and hail damage restoration, inspections, flat and commercial roofing, metal roofing, gutters, and siding.",
-        "priceRange": "$$",
         "areaServed": area,
         "address": {"@type":"PostalAddress","addressLocality":"Detroit","addressRegion":"MI","addressCountry":"US"},
         "serviceArea": {"@type":"GeoCircle",
@@ -336,7 +334,7 @@ SERVICE_TYPE = {
  "gutter-installation": "Gutter Installation and Repair",
  "siding-installation": "Siding Installation and Repair",
  "attic-ventilation-skylights": "Attic Ventilation and Skylight Installation",
- "roof-replacement-cost": "Roofing Cost Estimation",
+ "roof-replacement-cost": "Roof Replacement Planning",
 }
 
 def srcset(name, maxw):
@@ -370,14 +368,14 @@ def header(active=""):
     nav_call = ""
     if HAS_PHONE:
         nav_call = (f'<a class="nav-call" href="tel:{BIZ["tel"]}"><span class="ring">{ICONS["phone"]}</span>'
-                    f'<span><small>Call for a free estimate</small><span class="ph">{esc(BIZ["phone"])}</span></span></a>')
+                    f'<span><small>Call us today</small><span class="ph">{esc(BIZ["phone"])}</span></span></a>')
     return f'''<div class="topbar"><div class="container">
     <div class="topbar-left">
       <span class="ico">{ICONS["mappin"]} {esc(BIZ["area_line"])}</span>
       <span class="ico">{ICONS["clock"]} {esc(BIZ["hours_short"])}</span>
     </div>
     <div class="topbar-right">
-      <span class="badge-24"><span class="dot ok"></span>Free Estimates · Licensed &amp; Insured</span>
+      <span class="badge-24"><span class="dot ok"></span>Local Metro Detroit Roofers</span>
       <a href="mailto:{BIZ["email"]}">{ICONS["mail"]} {esc(BIZ["email"])}</a>
     </div></div></div>
   <header class="site-header" id="siteHeader">
@@ -396,14 +394,14 @@ def header(active=""):
           <div class="dropdown areas" id="dd-areas"><div class="dd-grid three">{city_items}</div>
             <div class="dd-foot"><span>18+ metro Detroit cities across 3 counties.</span>
             <a class="sc-link" href="/service-areas/">All areas {ICONS["arrow"]}</a></div></div></li>
-        <li><a href="/services/roof-replacement-cost/"{' aria-current="page"' if active=="cost" else ''}>Pricing</a></li>
+        <li><a href="/services/roof-replacement-cost/"{' aria-current="page"' if active=="cost" else ''}>Costs</a></li>
         <li><a href="/about/"{' aria-current="page"' if active=="about" else ''}>About</a></li>
         <li><a href="/reviews/"{' aria-current="page"' if active=="reviews" else ''}>Reviews</a></li>
         <li><a href="/contact/"{' aria-current="page"' if active=="contact" else ''}>Contact</a></li>
       </ul>
       <div class="nav-actions">
         {nav_call}
-        <a class="btn btn-primary" href="/contact/">Free Estimate</a>
+        <a class="btn btn-primary" href="/contact/">Contact Us</a>
         <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </nav></div>
@@ -415,7 +413,7 @@ def mobile_cta():
     else:
         first = f'<a class="btn btn-navy" href="mailto:{BIZ["email"]}">{ICONS["mail"]} Email Us</a>'
     return (f'<div class="mobile-cta">{first}'
-            f'<a class="btn btn-primary" href="/contact/">Free Estimate</a></div>')
+            f'<a class="btn btn-primary" href="/contact/">Contact Us</a></div>')
 
 def footer():
     svc_links = "".join(f'<li><a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a></li>' for s in SVC_ORDER)
@@ -426,15 +424,14 @@ def footer():
             continue  # never render dead "#" links — add real profile URLs in BIZ when live
         social += f'<a href="{url}" aria-label="{key.title()}" target="_blank" rel="noopener">{ICONS[key]}</a>'
     social_html = f'<div class="social">{social}</div>' if social else ''
-    lic = f' · License #{esc(BIZ["license_no"])}' if BIZ["license_no"] else ""
-    phone_li = (f'<li>{ICONS["phone"]}<span><a href="tel:{BIZ["tel"]}">{esc(BIZ["phone"])}</a><br><small>Free estimates · fast scheduling</small></span></li>'
+    phone_li = (f'<li>{ICONS["phone"]}<span><a href="tel:{BIZ["tel"]}">{esc(BIZ["phone"])}</a><br><small>Fast, reliable scheduling</small></span></li>'
                 if HAS_PHONE else "")
     return f'''<footer class="site-footer">
     <div class="container"><div class="footer-grid">
       <div class="footer-brand">
         <a class="brand" href="/"><img src="/assets/img/logo-mark.svg" width="46" height="46" alt="">
           <span class="wm"><span class="name">BH Roofing</span><span class="tag">Metro Detroit</span></span></a>
-        <p>Residential &amp; commercial roofing across metro Detroit — roof replacement, repair, storm &amp; hail damage restoration, inspections, flat &amp; commercial, metal roofing, gutters &amp; siding. Licensed &amp; insured, honest pricing, free estimates.</p>
+        <p>Residential &amp; commercial roofing across metro Detroit — roof replacement, repair, storm &amp; hail damage restoration, inspections, flat &amp; commercial, metal roofing, gutters &amp; siding. Honest advice, clean work, and fast, reliable scheduling.</p>
         {social_html}
       </div>
       <div class="footer-col"><h4>Services</h4><ul>{svc_links}
@@ -448,11 +445,11 @@ def footer():
           <li>{ICONS["mappin"]}<span>{esc(BIZ["area_line"])}</span></li>
           <li>{ICONS["clock"]}<span>{esc(BIZ["hours_full"])}</span></li>
         </ul>
-        <a class="btn btn-primary btn-block" href="/contact/">Request Free Estimate</a>
+        <a class="btn btn-primary btn-block" href="/contact/">Contact Us</a>
       </div>
     </div></div>
     <div class="footer-bottom"><div class="container">
-      <span>© {datetime.date.today().year} {esc(BIZ["name"])}. All rights reserved.{lic} · Built, designed &amp; promoted by <a href="https://www.gothamsitestudio.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Gotham Site Studio</a></span>
+      <span>© {datetime.date.today().year} {esc(BIZ["name"])}. All rights reserved. · Built, designed &amp; promoted by <a href="https://www.gothamsitestudio.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Gotham Site Studio</a></span>
       <span><a href="/service-areas/">Service Areas</a> · <a href="/services/">Services</a> · <a href="/about/">About</a> · <a href="/reviews/">Reviews</a> · <a href="/faq/">FAQ</a> · <a href="/gallery/">Gallery</a> · <a href="/financing/">Financing</a> · <a href="/contact/">Contact</a> · <a href="/sitemap.xml">Sitemap</a></span>
     </div></div>
   </footer>'''
@@ -465,12 +462,12 @@ def breadcrumb(items):
         else: lis += f'<li><a href="{u}">{esc(n)}</a></li>'
     return f'<nav class="breadcrumb" aria-label="Breadcrumb"><div class="container"><ol>{lis}</ol></div></nav>'
 
-def cta_band(title="Ready for a roof you don't have to think about?", text="Get a free, no-obligation estimate today. Fast, reliable scheduling across metro Detroit whenever our schedule allows."):
+def cta_band(title="Ready for a roof you don't have to think about?", text="Tell us what's going on and we'll get back to you. Fast, reliable scheduling across metro Detroit whenever our schedule allows."):
     if HAS_PHONE:
         actions = (f'<a class="btn btn-primary btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a>'
-                   f'<a class="btn btn-white btn-lg" href="/contact/">Free Estimate</a>')
+                   f'<a class="btn btn-white btn-lg" href="/contact/">Contact Us</a>')
     else:
-        actions = (f'<a class="btn btn-primary btn-lg" href="/contact/">{ICONS["calendar"]} Get My Free Estimate</a>'
+        actions = (f'<a class="btn btn-primary btn-lg" href="/contact/">{ICONS["calendar"]} Contact Us</a>'
                    f'<a class="btn btn-white btn-lg" href="mailto:{BIZ["email"]}">{ICONS["mail"]} Email Us</a>')
     return f'''<section class="section"><div class="container"><div class="cta-band"><div class="inner">
       <div><h2>{esc(title)}</h2><p>{esc(text)}</p></div>
@@ -509,7 +506,7 @@ def resource_row(exclude=None, label="Helpful next steps"):
     from the nav/footer (about, gallery, reviews, faq, financing, cost guide)."""
     items = [
         ("/services/", "All roofing services"),
-        ("/services/roof-replacement-cost/", "Roofing cost guide"),
+        ("/services/roof-replacement-cost/", "What drives roofing cost"),
         ("/service-areas/", "Areas we serve"),
         ("/gallery/", "See our work"),
         ("/reviews/", "Reviews &amp; our promise"),
@@ -550,7 +547,7 @@ def reviews_invite(on_reviews_page=False):
         btns = (f'<a class="btn btn-primary" href="{BIZ["google"]}" target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>'
                 f'<a class="btn btn-ghost" href="/reviews/">More about our promise {ICONS["arrow"]}</a>')
     elif on_reviews_page:
-        btns = (f'<a class="btn btn-primary" href="/contact/">{ICONS["calendar"]} Get a free estimate</a>'
+        btns = (f'<a class="btn btn-primary" href="/contact/">{ICONS["calendar"]} Contact Us</a>'
                 f'<a class="btn btn-ghost" href="/gallery/">See our work {ICONS["arrow"]}</a>')
     else:
         btns = (f'<a class="btn btn-primary" href="/reviews/">{ICONS["badge"]} Our promise to every customer</a>'
@@ -659,14 +656,14 @@ def build_home():
         <h1>{h1}</h1>
         <p class="lead">{esc(h["hero_sub"])}</p>
         <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="/contact/">{ICONS["calendar"]} Get My Free Estimate</a>
+          <a class="btn btn-primary btn-lg" href="/contact/">{ICONS["calendar"]} Contact Us</a>
           {hero_secondary("btn-lg")}
         </div>
         <div class="hero-trust">{chips}</div>
       </div>
       <div class="hero-media">
         <img src="/assets/img/hero-home.webp" srcset="{srcset("hero-home",1600)}" sizes="{SIZES_HERO}" width="1600" height="1000" fetchpriority="high" alt="Newly installed asphalt shingle roof on a metro Detroit home">
-        <div class="hero-badge"><span class="hb-ic">{ICONS["shield"]}</span><span><b>Licensed &amp; Insured</b><span>free estimates across metro Detroit</span></span></div>
+        <div class="hero-badge"><span class="hb-ic">{ICONS["roof"]}</span><span><b>Local roofing team</b><span>serving metro Detroit &amp; 18+ suburbs</span></span></div>
       </div>
     </div></div></section>
     {trust_strip()}
@@ -718,7 +715,7 @@ def build_services_hub():
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Our Services</span><h1>Roofing Services in Metro Detroit</h1>
       <p>From a full tear-off and replacement to a stubborn leak, storm damage, or aging flat roof, BH Roofing installs and repairs every kind of residential and commercial roof across Wayne, Oakland, and Macomb counties — with honest advice and fast, reliable scheduling.</p>
-      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
+      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Contact Us</a>
       {hero_secondary("btn-lg")}</div></div>
       <div class="page-hero-media"><img src="/assets/img/svc-replacement.webp" srcset="{srcset("svc-replacement",1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="Roofing services in metro Detroit"></div>
     </div></div></section>
@@ -728,7 +725,7 @@ def build_services_hub():
     {value_props_block()}
     {cta_band()}'''
     render("/services/", "Roofing Services Metro Detroit | BH Roofing",
-           "Residential & commercial roofing in metro Detroit — roof replacement, repair, storm & hail damage, inspections, flat, metal, gutters & siding. Free estimates.",
+           "Residential & commercial roofing in metro Detroit: roof replacement, repair, storm & hail damage, inspections, flat, metal, gutters & siding. Contact us today.",
            body, graph)
 
 def build_service(slug):
@@ -761,12 +758,12 @@ def build_service(slug):
              service_node(SERVICE_TYPE[slug], slug, c["meta_description"]), faq_node(faqs)]
     active = "cost" if slug=="roof-replacement-cost" else ""
     cost_link = ("" if slug=="roof-replacement-cost" else
-                 '<p style="margin-top:.9em;font-size:.92rem;text-align:center"><a href="/services/roof-replacement-cost/">See typical metro Detroit roofing prices →</a></p>')
+                 '<p style="margin-top:.9em;font-size:.92rem;text-align:center"><a href="/services/roof-replacement-cost/">What drives the cost of a roof →</a></p>')
     group_badge = f'<span class="pill">{esc(i["group"])}</span>'
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div>{group_badge}<h1 style="margin-top:.5em">{esc(c["h1"])}</h1>
       <p>{esc(c["hero_tagline"])}</p>
-      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
+      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Contact Us</a>
       {hero_secondary("btn-lg")}</div></div>
       <div class="page-hero-media"><img src="/assets/img/{i["img"]}.webp" srcset="{srcset(i["img"],1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="{esc(c["h1"])} — BH Roofing"></div>
     </div></div></section>
@@ -781,15 +778,15 @@ def build_service(slug):
       </div>
       <aside class="sidebar-card">
         <h3>Request this service</h3>
-        <p style="color:var(--slate);font-size:.95rem">Free, no-obligation estimate — usually same or next day across metro Detroit whenever our schedule allows.</p>
-        <a class="btn btn-primary btn-block" href="/contact/">Get My Free Estimate</a>
+        <p style="color:var(--slate);font-size:.95rem">Tell us about your roof and we'll get back to you, usually the same or next day, whenever our schedule allows.</p>
+        <a class="btn btn-primary btn-block" href="/contact/">Contact Us</a>
         {('<p class="text-center" style="margin:.8em 0 .2em;color:var(--steel);font-size:.9rem">or call</p><a class="btn btn-navy btn-block" href="tel:'+BIZ["tel"]+'">'+ICONS["phone"]+' '+esc(BIZ["phone"])+'</a>') if HAS_PHONE else ('<p class="text-center" style="margin:.8em 0 .2em;color:var(--steel);font-size:.9rem">or email</p><a class="btn btn-navy btn-block" href="mailto:'+BIZ["email"]+'">'+ICONS["mail"]+' Email Us</a>')}
         {cost_link}
         <h3 style="margin-top:1.4em">Why choose BH Roofing</h3>
         <ul class="chk">
-          <li>Licensed &amp; insured local crew</li>
+          <li>Local metro Detroit crew</li>
           <li>Fast, reliable scheduling</li>
-          <li>Upfront, written pricing</li>
+          <li>Honest repair-or-replace advice</li>
           <li>Workmanship guarantee</li>
           <li>Full cleanup &amp; magnetic nail sweep</li>
         </ul>
@@ -821,7 +818,7 @@ def build_areas_hub():
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Service Areas</span><h1>Metro Detroit Service Areas for Roofing</h1>
       <p>No storefront, no showroom markup — just a local crew that comes to you. We serve metro Detroit and every suburb within 35 miles across Wayne, Oakland, and Macomb counties.</p>
-      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
+      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Contact Us</a>
       {hero_secondary("btn-lg")}</div></div>
       <div class="page-hero-media"><img src="/assets/img/area-neighborhood.webp" srcset="{srcset("area-neighborhood",1600)}" sizes="{SIZES_HERO}" width="1600" height="900" fetchpriority="high" alt="Metro Detroit suburban neighborhood served by BH Roofing"></div>
     </div></div></section>
@@ -833,7 +830,7 @@ def build_areas_hub():
     {value_props_block()}
     {cta_band()}'''
     render("/service-areas/", "Service Areas — Roofing Metro Detroit | BH Roofing",
-           "See the metro Detroit cities BH Roofing serves — 18+ suburbs across Wayne, Oakland & Macomb counties. Roof replacement, repair & storm damage. Free estimates.",
+           "See the metro Detroit cities BH Roofing serves: 18+ suburbs across Wayne, Oakland & Macomb counties. Roof replacement, repair & storm damage.",
            body, graph)
 
 def build_city(slug):
@@ -859,25 +856,25 @@ def build_city(slug):
     _ri = CITY_ORDER.index(slug) % 4
     if _ri == 0:
         repl_p = (f"Not every roof can — or should — be torn off. When years of {county} County freeze-thaw, ice dams, and summer heat have "
-                  f"worn out your shingles, we'll tell you straight and quote a full roof replacement in {c['city']} at an honest, written price. "
+                  f"worn out your shingles, we'll tell you straight whether a full roof replacement in {c['city']} makes sense, with an honest, written price. "
                   f"You'll get clear repair-versus-replace advice, plus options across {_svc1.lower()} and {_svc2.lower()} that fit your home and budget.")
     elif _ri == 1:
         repl_p = (f"If your roof is past patching, our {c['city']} roof replacement service handles everything in one project — we protect the property, "
                   f"tear off the old layers, install fresh underlayment, ice-and-water shield, and shingles, then sweep up every nail. "
-                  f"From {_svc1.lower()} to {_svc2.lower()}, replacement quotes in {c['city']} are always free and no-obligation.")
+                  f"From {_svc1.lower()} to {_svc2.lower()}, we explain every option in {c['city']} with no pressure and no obligation.")
     elif _ri == 2:
-        repl_p = (f"Thinking about a roof replacement in {c['city']}? We'll walk you through shingle choices, ventilation, and real "
-                  f"pricing before you commit — and if a repair will honestly do the job, we'll say so. Most {c['city']} re-roofs, "
+        repl_p = (f"Thinking about a roof replacement in {c['city']}? We'll walk you through shingle choices, ventilation, and what drives "
+                  f"the price before you commit, and if a repair will honestly do the job, we'll say so. Most {c['city']} re-roofs, "
                   f"including {_svc1.lower()} and {_svc2.lower()}, are completed fast so your home isn't exposed to Michigan weather.")
     else:
         repl_p = (f"When {c['city']} homeowners ask whether it's time to replace their roof, we look at the shingles, flashing, valleys, and ventilation "
-                  f"— not just the surface. If replacement wins, you get an exact written quote covering materials, labor, and cleanup. "
+                  f"— not just the surface. If replacement wins, you get a written price covering materials, labor, and cleanup. "
                   f"We handle everything from {_svc1.lower()} to {_svc2.lower()} across {county} County.")
     replacement_sec = f'<h2>Roof replacement in {esc(c["city"])}, MI</h2><p>{esc(repl_p)}</p>'
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">{esc(county)} County · Metro Detroit</span><h1>{esc(c["h1"])}</h1>
       <p>{esc(c["hero_tagline"])}</p>
-      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Free Estimate in {esc(c["city"])}</a>
+      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Contact Us</a>
       {hero_secondary("btn-lg")}</div></div>
       <div class="page-hero-media"><img src="/assets/img/{img}" srcset="{srcset(img_name,1600)}" sizes="{SIZES_HERO}" width="1600" height="900" fetchpriority="high" alt="Roofing in {esc(c["city"])}, Michigan"></div>
     </div></div></section>
@@ -893,9 +890,9 @@ def build_city(slug):
         <p>{esc_inline(c["service_emphasis"], lk)}</p>
       </div>
       <aside class="sidebar-card">
-        <h3>Free estimate in {esc(c["city"])}</h3>
-        <p style="color:var(--slate);font-size:.95rem">Local, licensed &amp; insured. Fast, reliable scheduling across {esc(county)} County.</p>
-        <a class="btn btn-primary btn-block" href="/contact/">Get My Free Estimate</a>
+        <h3>Roofing help in {esc(c["city"])}</h3>
+        <p style="color:var(--slate);font-size:.95rem">Local roofers. Fast, reliable scheduling across {esc(county)} County.</p>
+        <a class="btn btn-primary btn-block" href="/contact/">Contact Us</a>
         {('<p class="text-center" style="margin:.8em 0 .2em;color:var(--steel);font-size:.9rem">or call</p><a class="btn btn-navy btn-block" href="tel:'+BIZ["tel"]+'">'+ICONS["phone"]+' '+esc(BIZ["phone"])+'</a>') if HAS_PHONE else ('<p class="text-center" style="margin:.8em 0 .2em;color:var(--steel);font-size:.9rem">or email</p><a class="btn btn-navy btn-block" href="mailto:'+BIZ["email"]+'">'+ICONS["mail"]+' Email Us</a>')}
         <h3 style="margin-top:1.4em">Why {esc(c["city"])} calls BH Roofing</h3>
         <ul class="chk">{why}</ul>
@@ -909,7 +906,7 @@ def build_city(slug):
       <div class="section-head"><span class="eyebrow">Nearby</span><h2>We also serve neighboring communities</h2></div>
       <div class="city-grid">{neigh}</div>
       {resource_row(exclude=city_url(slug))}</div></section>
-    {cta_band(f"Need a roof repaired or replaced in {c['city']}?", "Get a free, no-obligation estimate today. Fast, reliable scheduling across " + county + " County whenever our schedule allows.")}'''
+    {cta_band(f"Need a roof repaired or replaced in {c['city']}?", "Tell us what's going on and we'll get back to you. Fast, reliable scheduling across " + county + " County whenever our schedule allows.")}'''
     render(city_url(slug), c["meta_title"], c["meta_description"], body, graph)
 
 def build_about():
@@ -946,17 +943,17 @@ def build_financing():
     pts = "".join(f"<li>{esc(x)}</li>" for x in f["points"])
     fin_faqs = [
         ("Can I finance a roof replacement in metro Detroit?",
-         "Yes. BH Roofing offers financing options through third-party lenders on approved credit, so you can replace or repair your roof now and spread the cost over comfortable monthly payments. Ask your estimator for current plans when you book your free estimate."),
+         "Yes. BH Roofing offers financing options through third-party lenders on approved credit, so you can replace or repair your roof now and spread the cost over comfortable monthly payments. Ask us about current plans when you get in touch."),
         ("Does applying for roofing financing change the price of the job?",
-         "No. Your written quote is the same whether you pay upfront or finance. We quote the roof, materials, and labor first — then you choose the payment option that works for you. There's never a penalty for paying the job off early with our typical lender programs."),
+         "No. The price of your job is the same whether you pay upfront or finance. We price the roof, materials, and labor first, then you choose the payment option that works for you. There's never a penalty for paying the job off early with our typical lender programs."),
         ("What roofing projects can be financed?",
          "Most projects qualify — full roof replacement, larger repairs, metal and flat roofing, gutters, and siding. Bigger jobs like a complete tear-off and re-roof are where monthly payments help most, but many mid-size repairs can qualify too."),
         ("How do I get started with financing?",
-         "Book your free estimate first. Once you have your written quote, we'll walk you through the current financing options and the lender's short application — most decisions come back quickly, and approved projects can usually be scheduled right away."),
+         "Get in touch first. Once you have the written price for your job, we'll walk you through the current financing options and the lender's short application. Most decisions come back quickly, and approved projects can usually be scheduled right away."),
     ]
     graph = [breadcrumb_node([("Home","/"),("Financing","/financing/")]), faq_node(fin_faqs)]
     steps = """<ol>
-        <li><strong>Get your free estimate.</strong> We inspect the roof, walk you through options at every price point, and give you a clear written quote — no obligation.</li>
+        <li><strong>Get in touch.</strong> We inspect the roof, walk you through your options, and give you a clear written price for your job, with no obligation.</li>
         <li><strong>Choose how to pay.</strong> Pay upfront, or ask about monthly payment plans through our third-party lending partners on approved credit.</li>
         <li><strong>Quick application.</strong> The lender's application takes minutes, and most credit decisions come back fast.</li>
         <li><strong>We get to work.</strong> Once approved, we schedule your roofing project — often within days.</li>
@@ -976,20 +973,20 @@ def build_financing():
       {steps}
       <h2>Why metro Detroit homeowners finance their roofs</h2>
       <p>A new roof is one of the highest-return upgrades a Michigan home can get — better protection against ice dams and leaks, lower energy bills through the freeze-thaw months, and instant curb appeal. But roofs fail on their own schedule, not your budget's. Financing lets you fix a leaking, storm-damaged, or worn-out roof <em>now</em>, before a Michigan winter makes it worse, and pay over time instead of putting the project off another season.</p>
-      <p>It also means you don't have to settle. Homeowners who planned on the most basic shingle often find that for a modest monthly difference they can get the architectural shingles, upgraded ventilation, or metal roof they actually wanted. Pair your quote with our <a href="/services/roof-replacement-cost/">roof replacement cost guide</a> to see typical metro Detroit price ranges before we arrive.</p>
-      <div class="note">Ask your BH Roofing estimator about current financing options and promotions when you book your free estimate. Terms are provided by third-party lenders on approved credit.</div>
+      <p>It also means you don't have to settle. Homeowners who planned on the most basic shingle often find that for a modest monthly difference they can get the architectural shingles, upgraded ventilation, or metal roof they actually wanted. Our guide to <a href="/services/roof-replacement-cost/">what drives roof replacement cost</a> explains what moves the price before we arrive.</p>
+      <div class="note">Ask BH Roofing about current financing options when you get in touch. Terms are provided by third-party lenders on approved credit.</div>
     </div></div></section>
     {faq_section(fin_faqs, "Roofing financing — FAQs")}
-    {cta_band("Ready to protect your home without the wait?", "Get your free estimate and ask about monthly payment options — fast, reliable scheduling across metro Detroit whenever our schedule allows.")}'''
+    {cta_band("Ready to protect your home without the wait?", "Get in touch and ask about monthly payment options. Fast, reliable scheduling across metro Detroit whenever our schedule allows.")}'''
     render("/financing/", f["meta_title"], f["meta_description"], body, graph)
 
 def build_reviews():
     graph = [breadcrumb_node([("Home","/"),("Reviews","/reviews/")])]
     if BIZ["google"]:
         hero_btns = (f'<a class="btn btn-primary btn-lg" href="{BIZ["google"]}" target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>'
-                     f'<a class="btn btn-ghost btn-lg" href="/contact/">Get a Free Estimate</a>')
+                     f'<a class="btn btn-ghost btn-lg" href="/contact/">Contact Us</a>')
     else:
-        hero_btns = (f'<a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>'
+        hero_btns = (f'<a class="btn btn-primary btn-lg" href="/contact/">Contact Us</a>'
                      f'{hero_secondary("btn-lg")}')
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Reviews</span><h1>What Metro Detroit Says About Us</h1>
@@ -1004,7 +1001,7 @@ def build_reviews():
       <p>Reviews are earned, not written. As we complete roofs across metro Detroit, verified customer reviews will appear here and on our Google Business Profile. In the meantime, here's exactly what you can expect when you call BH Roofing:</p>
       <ul>
         <li><strong>On-time arrival</strong> in the window we promise — with a heads-up when we're on the way.</li>
-        <li><strong>A clear, written quote</strong> before any work starts. No surprises, no pressure.</li>
+        <li><strong>A clear, written price</strong> before any work starts. No surprises, no pressure.</li>
         <li><strong>Clean, careful work</strong> that protects your property, followed by a full cleanup and magnetic nail sweep.</li>
         <li><strong>A workmanship guarantee</strong> — if something isn't right, we come back and make it right.</li>
       </ul>
@@ -1013,7 +1010,7 @@ def build_reviews():
     {reviews_invite(on_reviews_page=True)}
     {cta_band()}'''
     render("/reviews/", "Reviews — BH Roofing Metro Detroit",
-           "See what to expect from BH Roofing — metro Detroit's local roofing team. Licensed, insured, guaranteed, with honest pricing and fast scheduling.",
+           "See what to expect from BH Roofing, metro Detroit's local roofing team: honest advice, clean work, a workmanship guarantee, and fast scheduling.",
            body, graph, active="reviews")
 
 def build_contact():
@@ -1026,19 +1023,19 @@ def build_contact():
         hero_call = f'<div style="margin-top:1.4em"><a class="btn btn-primary btn-lg" href="mailto:{BIZ["email"]}">{ICONS["mail"]} Email {esc(BIZ["email"])}</a></div>'
         contact_feature = f'<div class="feature"><div class="f-ic">{ICONS["mail"]}</div><h3>Email us</h3><p><a href="mailto:{BIZ["email"]}">{esc(BIZ["email"])}</a><br><small>We reply fast — usually the same day.</small></p></div>'
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
-      <div><span class="eyebrow">Contact</span><h1>Get Your Free Roofing Estimate</h1>
+      <div><span class="eyebrow">Contact</span><h1>Contact BH Roofing</h1>
       <p>{esc(CORE["contact_lead"])}</p>
       <ul class="chk" style="margin-top:1.2em;max-width:420px">
-        <li>Free, no-obligation estimates &amp; roof inspections</li>
+        <li>Roof repairs, replacements &amp; inspections</li>
         <li>Fast, reliable scheduling</li>
-        <li>Licensed, insured &amp; local to metro Detroit</li>
+        <li>Local to metro Detroit</li>
       </ul>
       {hero_call}
       </div>
       <div class="form-card">
         <h2 style="font-size:1.5rem;margin-bottom:.2em">Request a callback</h2>
         <p style="color:var(--steel);font-size:.92rem;margin-bottom:1em">We'll get back to you fast — usually the same day.</p>
-        <div id="formErr" class="note" role="alert" style="display:none;border-color:var(--danger);background:var(--danger-050);margin-bottom:16px">Sorry — something went wrong sending your request. Please email us at <a href="mailto:{BIZ["email"]}">{esc(BIZ["email"])}</a> and we'll help right away.</div>
+        <div id="formErr" class="note" role="alert" style="display:none;border-color:var(--danger);background:var(--danger-050);margin-bottom:16px">Sorry, something went wrong sending your message. Please email us at <a href="mailto:{BIZ["email"]}">{esc(BIZ["email"])}</a> and we'll help right away.</div>
         <form action="https://bh-roofing-form.oren-siyonov.workers.dev" method="POST">
           <div class="form-row">
             <div class="field"><label for="name">Name <span class="req">*</span></label><input id="name" name="name" required autocomplete="name"></div>
@@ -1050,7 +1047,7 @@ def build_contact():
           </div>
           <div class="field"><label for="message">How can we help?</label><textarea id="message" name="message" placeholder="Tell us about your roof…"></textarea></div>
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button class="btn btn-primary btn-lg btn-block" type="submit">{ICONS["calendar"]} Request My Free Estimate</button>
+          <button class="btn btn-primary btn-lg btn-block" type="submit">{ICONS["mail"]} Send Message</button>
           <p class="form-note">By submitting you agree to be contacted about your request. We never share your information.</p>
         </form>
       </div>
@@ -1061,9 +1058,9 @@ def build_contact():
       <div class="feature"><div class="f-ic">{ICONS["clock"]}</div><h3>Hours</h3><p>{esc(BIZ["hours_full"])}</p></div>
       <div class="feature"><div class="f-ic">{ICONS["mappin"]}</div><h3>Service area</h3><p>{esc(BIZ["area_line"])} across Wayne, Oakland &amp; Macomb counties.</p></div>
     </div></div></section>
-    {cta_band("Let's get your roof sorted", "Tell us what's going on and we'll take care of it. Free estimates and fast, reliable scheduling across metro Detroit whenever our schedule allows.")}'''
-    render("/contact/", "Contact — Free Roofing Estimate | BH Roofing Metro Detroit",
-           "Contact BH Roofing for a free roof replacement or repair estimate in metro Detroit. Fast, reliable scheduling — request your free estimate today.",
+    {cta_band("Let's get your roof sorted", "Tell us what's going on and we'll take care of it. Fast, reliable scheduling across metro Detroit whenever our schedule allows.")}'''
+    render("/contact/", "Contact Us | BH Roofing Metro Detroit",
+           "Contact BH Roofing about roof replacement, repair or storm damage in metro Detroit. Send us a message or call (313) 236-4558 and we'll be in touch shortly.",
            body, graph, active="contact")
 
 def build_gallery():
@@ -1083,7 +1080,7 @@ def build_gallery():
     </div></section>
     {breadcrumb([("Home","/"),("Gallery","/gallery/")])}
     <section class="section"><div class="container"><div class="grid grid-3">{cards}</div>
-      <div class="note mt-3">Photos shown are representative of our work and product styles. Ask us for recent project examples in your neighborhood when you book a free estimate.</div>
+      <div class="note mt-3">Photos shown are representative of our work and product styles. Ask us for recent project examples in your neighborhood when you get in touch.</div>
     </div></section>
     {cta_band()}'''
     render("/gallery/", "Gallery — Roofing Work | BH Roofing Metro Detroit",
@@ -1108,7 +1105,7 @@ def build_faq_hub():
     <section class="section"><div class="container">
       <div class="prose wide" style="margin-inline:auto;margin-bottom:1.6em">
         <p class="lead">This is the master list of every question we get asked across metro Detroit — pulled together in one place so you can compare answers across services. Deciding between repair and replacement? Start with the cost questions, then check the service-specific ones below.</p>
-        <p>Prefer answers in context? Each service page covers its own FAQs alongside photos, what's included, and pricing guidance: {svc_faq_links}. Still stuck? <a href="/contact/">Send us the question</a> — a real person answers, usually the same day.</p>
+        <p>Prefer answers in context? Each service page covers its own FAQs alongside photos, what's included, and what drives the cost: {svc_faq_links}. Still stuck? <a href="/contact/">Send us the question</a> — a real person answers, usually the same day.</p>
       </div>
       <div class="faq">{items}</div></div></section>
     {cta_band()}'''
@@ -1124,7 +1121,7 @@ def build_thanks():
         sooner = f'<a class="btn btn-primary btn-lg" href="mailto:{BIZ["email"]}">{ICONS["mail"]} Email Us</a>'
     body = f'''<section class="section" style="min-height:52vh;display:grid;place-items:center;text-align:center"><div class="container" style="max-width:640px">
       <div class="f-ic" style="margin:0 auto 18px;width:70px;height:70px;background:var(--success-050);color:var(--success);border-radius:18px;display:grid;place-items:center">{ICONS["check"]}</div>
-      <h1>Thanks — we've got your request!</h1>
+      <h1>Message sent. We will be in touch shortly.</h1>
       <p class="lead">A member of the BH Roofing team will reach out shortly, usually the same day. Need us sooner?</p>
       <div class="hero-cta" style="justify-content:center">{sooner}
       <a class="btn btn-ghost btn-lg" href="/">Back to home</a></div>
@@ -1140,7 +1137,7 @@ def build_404():
       <p class="lead">The page you're looking for isn't here — but we can still help with your roof. Try one of these:</p>
       <div class="hero-cta" style="justify-content:center"><a class="btn btn-primary btn-lg" href="/">Home</a>
       <a class="btn btn-ghost btn-lg" href="/services/">Services</a>
-      <a class="btn btn-ghost btn-lg" href="/contact/">Free Estimate</a></div>
+      <a class="btn btn-ghost btn-lg" href="/contact/">Contact Us</a></div>
     </div></section>'''
     doc = page_wrap("/404.html","Page Not Found | BH Roofing","Page not found.",body,[],robots="noindex,follow")
     open(os.path.join(ROOT,"404.html"),"w",encoding="utf-8").write(doc)

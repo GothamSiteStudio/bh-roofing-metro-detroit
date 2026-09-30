@@ -63,17 +63,23 @@ Confident, local, plain-spoken, reassuring — a trusted neighbor-tradesman. Lea
 Michigan-weather-aware throughout (freeze-thaw, ice dams, snow load, spring wind & hail, lake-effect).
 
 **Core value props:** fast/reliable scheduling · local metro Detroit roofers · every roofing service one team ·
-honest upfront pricing (repair-vs-replace straight talk) · licensed/insured/guaranteed with full cleanup & nail sweep ·
+honest repair-vs-replace straight talk · workmanship guarantee with full cleanup & nail sweep ·
 curb appeal & home value.
 
-**Trust signals:** licensed & insured (placeholder — client to confirm) · workmanship guarantee + manufacturer-backed
-material warranties (generic) · free no-obligation estimates · financing available · brands installed (GAF, Owens
-Corning, CertainTeed, IKO, Malarkey, Velux).
+**Trust signals:** workmanship guarantee + manufacturer-backed material warranties (generic) · no-obligation
+inspections · financing available · brands installed (GAF, Owens Corning, CertainTeed, IKO, Malarkey, Velux).
+
+> **Owner decisions, 2026-09-30 (standing rules):** nothing on the site may say or imply that the business or its
+> crews are licensed, insured or bonded, and no licence number is shown. NO prices: no dollar
+> figures, ranges, fees, "starting at" or cost tables anywhere (text, meta, JSON-LD, alt text), and no "free
+> estimate", "free quote", "free inspection", "no trip fee" or "no-charge" promises. Forms and buttons are contact
+> wording only ("Contact Us", "Send Message"); the /contact/ form posts to the bh-roofing-form Cloudflare worker.
 
 > **Data-integrity rules (enforced in the copy):** NO fabricated phone number, license #, "since [year]", review
 > counts/ratings, testimonials, or named certifications (no "Master Elite" etc.). Storm page: help document damage &
 > navigate the insurance claim, but **the homeowner pays their own deductible** — never promise "free" insurance roofs
-> or waived deductibles. Cost figures are typical market ranges pointing to a free exact estimate. No AggregateRating/
+> or waived deductibles. The cost page explains what drives the price, with no figures, and points to a call for a price on
+> the job. No AggregateRating/
 > Review schema until real reviews exist.
 
 ## 6. TECHNICAL SEO
@@ -90,7 +96,7 @@ Corning, CertainTeed, IKO, Malarkey, Velux).
 
 Hub-and-spoke: Home → services hub + areas hub → individual pages; related-service cross-links; city↔service
 intersection links (each city surfaces the 4 services its housing stock needs most + 3 neighbor cities). Every page
-carries a primary "Free Estimate" CTA and a repeating CTA band; the cost guide is linked from every service page.
+carries a primary "Contact Us" CTA and a repeating CTA band; the cost factors page is linked from every service page.
 
 ## 8. BUILD SYSTEM
 
